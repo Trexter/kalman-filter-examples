@@ -17,10 +17,10 @@ H = [1, 0, 0, 0;
     0, 0, 0, 1];
 
 % prediction uncertainty 
-Q = [(2*dt)^2, 0, 0, 0;
-    0, (2*dt)^2, 0, 0;
-    0, 0, dt, 0;
-    0, 0, 0, dt]
+Q = [0.5*dt, 0, 0, 0;
+    0, 0.5*dt, 0, 0;
+    0, 0, 2*dt, 0;
+    0, 0, 0, 2*dt]
 
 % measurement uncertainty
 R = [0.1, 0;
@@ -41,7 +41,15 @@ K = Sigma*H'*inv(S);
 x = x + K*y
 Sigma = (eye(4, 4) - K*H)*Sigma
 
+subplot(2, 1, 1)
 drawGaussian2D(Sigma(1:2, 1:2), x(1:2))
+xlabel('X(m)') % x-axis label
+ylabel('Y(m)') % y-axis label
+
+subplot(2, 1, 2)
+drawGaussian2D(Sigma(3:4, 3:4), x(3:4))
+xlabel('dX(m/s)') % x-axis label
+ylabel('dY(m/s)') % y-axis label
 
 pause(1)
 
