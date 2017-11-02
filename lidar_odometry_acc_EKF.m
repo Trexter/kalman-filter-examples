@@ -16,7 +16,7 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 % measurments from
 loop_time = 5;
 
-ground_truth_pos = [2*cos((t/loop_time)*2*pi);
+ground_truth_pos = [4*cos((t/loop_time)*2*pi);
     sin((t/loop_time)*2*pi) + 2];
 
 % the angle of this fake quad can be theoretically computed from the
@@ -32,6 +32,8 @@ u = u/norm(u);
 v = [0; 0;1];
 ground_truth_theta = (u(1)-v(1))/sqrt((u(1)-v(1))^2)*acos(dot(u, v));
 
+
+% PRECOMPUTE THE KALMAN FILTER FUNCTIONS/JACOBIANS
 
 dt = 0.1; % this is the time increments between measurements
 
@@ -49,17 +51,18 @@ f_func = [x + cos(theta)*(dt*b_dx + 0.5*dt^2*b_ax) - sin(theta)*(dt*b_dz + 0.5*d
     
 F_jaco = jacobian(f_func, mu);
 
-% measurement functions
+
+
+% synthetic measurement functions
 %[range, b_dx, b_dz, b_ax, b_az]
 % range is measured from the origin in the -z direction
 
-%  range function
+% ground truth range function
 lidar_dir_gt = ([cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)]*[0;1]);
 range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt)
 
 
-
-% run the filter 
+% RUN THE FILTER
 
 for time = (0:dt:20)
     draw2dQuad(ground_truth_pos, ground_truth_theta, range_gt, time)
