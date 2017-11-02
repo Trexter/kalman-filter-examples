@@ -16,7 +16,7 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 % measurments from
 loop_time = 5;
 
-ground_truth_pos = [cos((t/loop_time)*2*pi);
+ground_truth_pos = [2*cos((t/loop_time)*2*pi);
     sin((t/loop_time)*2*pi) + 2];
 
 % the angle of this fake quad can be theoretically computed from the
@@ -27,7 +27,11 @@ ground_truth_accel = [diff(ground_truth_vel(1), t);
                        diff(ground_truth_vel(2), t) + G];
                    
 % finally compute this vector's angle
-ground_truth_theta = acos(dot(ground_truth_accel, [0; 1]) / norm(ground_truth_accel));
+u = [ground_truth_accel(1);0;ground_truth_accel(2)];
+u = u/norm(u);
+v = [0; 0;1];
+ground_truth_theta = signacos(dot(u, v));
+
 
 dt = 0.1; % this is the time increments between measurements
 
@@ -53,5 +57,11 @@ F_jaco = jacobian(f_func, mu);
 lidar_dir_gt = ([cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)]*[0;1]);
 range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt)
 
-h_func = []
+
+
+% run the filter 
+
+for time = (0:dt:20)
+    draw2dQuad(ground_truth_pos, ground_truth_theta, range_gt, time)
+end
 

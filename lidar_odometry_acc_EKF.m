@@ -27,7 +27,11 @@ ground_truth_accel = [diff(ground_truth_vel(1), t);
                        diff(ground_truth_vel(2), t) + G];
                    
 % finally compute this vector's angle
-ground_truth_theta = acos(dot(ground_truth_accel, [0; 1]) / norm(ground_truth_accel));
+u = [ground_truth_accel(1);0;ground_truth_accel(2)];
+u = u/norm(u);
+v = [0; 0;1];
+ground_truth_theta = (u(1)-v(1))/sqrt((u(1)-v(1))^2)*acos(dot(u, v));
+
 
 dt = 0.1; % this is the time increments between measurements
 

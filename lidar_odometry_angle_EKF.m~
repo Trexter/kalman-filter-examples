@@ -1,8 +1,0 @@
-% a simulated EKF implementation where we estimate the state of a 2d
-% quadrotor flying over a planar surface measuring its angle, bodyframe
-% velocities, body frame accelerations, and range measurements from a rigidly mounted 1-d lidar
-
-% this is a very real
-syms x z theta b_dx b_dz b_dtheta b_ax b_ay bias_ax bias_ay
-
-mu = []
