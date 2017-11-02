@@ -16,7 +16,7 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 % measurments from
 loop_time = 5;
 
-ground_truth_pos = [cos((t/loop_time)*2*pi);
+ground_truth_pos = [2*cos((t/loop_time)*2*pi);
     sin((t/loop_time)*2*pi) + 2];
 
 % the angle of this fake quad can be theoretically computed from the
@@ -55,9 +55,9 @@ range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt)
 
 
 
-double(subs(range_gt, t, 1.25))
+% run the filter 
 
-ezplot(range_gt)
-
-h_func = []
+for time = (0:dt:20)
+    draw2dQuad(ground_truth_pos, ground_truth_theta, range_gt, time)
+end
 

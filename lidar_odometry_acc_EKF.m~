@@ -16,8 +16,8 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 % measurments from
 loop_time = 5;
 
-ground_truth_pos = [3*cos((t/loop_time)*2*pi);
-    3*sin((t/loop_time)*2*pi) + 2];
+ground_truth_pos = [cos((t/loop_time)*2*pi);
+    sin((t/loop_time)*2*pi) + 2];
 
 % the angle of this fake quad can be theoretically computed from the
 % direction of its acceleration
@@ -49,11 +49,9 @@ F_jaco = jacobian(f_func, mu);
 %[range, b_dx, b_dz, b_ax, b_az]
 % range is measured from the origin in the -z direction
 
-% synthetic range function
-lidar_dir = ([cos(theta), -sin(theta); sin(theta), cos(theta)]*[0;1]);
-range = norm((ground_truth_pos(2)/lidar_dir(2)) * lidar_dir)
-
-double(subs(range, [ground_truth_theta ,t], [theta,0]))
+%  range function
+lidar_dir_gt = ([cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)]*[0;1]);
+range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt)
 
 h_func = []
 
