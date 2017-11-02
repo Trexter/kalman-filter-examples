@@ -17,7 +17,7 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 loop_time = 5;
 
 ground_truth_pos = [4*cos((t/loop_time)*2*pi);
-    sin((t/loop_time)*2*pi) + 2];
+    1.5*sin((t/loop_time)*2*pi) + 2.5];
 
 % the angle of this fake quad can be theoretically computed from the
 % direction of its acceleration
