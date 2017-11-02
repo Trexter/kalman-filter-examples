@@ -7,6 +7,8 @@ syms x z theta b_dx b_dz b_dtheta b_ax b_az bias_ax bias_az t
 
 G = 9.8;
 
+dt = 0.1; % this is the time increments between measurements
+
 gt_accel_bias_x = 0.1;
 gt_accel_bias_z = 0.3;
 
@@ -30,12 +32,10 @@ ground_truth_accel = [diff(ground_truth_vel(1), t);
 u = [ground_truth_accel(1);0;ground_truth_accel(2)];
 u = u/norm(u);
 v = [0; 0;1];
-ground_truth_theta = (u(1)-v(1))/sqrt((u(1)-v(1))^2)*acos(dot(u, v));
+ground_truth_theta = sign(u(1)-v(1))*acos(dot(u, v));
 
 
 % PRECOMPUTE THE KALMAN FILTER FUNCTIONS/JACOBIANS
-
-dt = 0.1; % this is the time increments between measurements
 
 % precompute the kalman filter update and process functions
 f_func = [x + cos(theta)*(dt*b_dx + 0.5*dt^2*b_ax) - sin(theta)*(dt*b_dz + 0.5*dt^2*b_az);
