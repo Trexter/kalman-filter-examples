@@ -1,4 +1,4 @@
-function draw2dQuad(pos_function, theta_function, range_function, t_eval)
+function draw2dQuad(pos_function, theta_function, synthetic_z_func, t_eval)
     
     syms t
 
@@ -7,7 +7,7 @@ function draw2dQuad(pos_function, theta_function, range_function, t_eval)
     
     R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
     
-    range = double(subs(range_function, t, t_eval))
+    z = double(subs(synthetic_z_func, t, t_eval))
     
     clf;
     hold on
@@ -20,7 +20,7 @@ function draw2dQuad(pos_function, theta_function, range_function, t_eval)
     quiver(pos(1), pos(2), cos(theta), -sin(theta));
     quiver(pos(1), pos(2), sin(theta), cos(theta));
     
-    quiver(pos(1), pos(2), -range*sin(theta), -range*cos(theta));
+    quiver(pos(1), pos(2), -z(1)*sin(theta), -z(1)*cos(theta));
     
     hold off
     drawnow

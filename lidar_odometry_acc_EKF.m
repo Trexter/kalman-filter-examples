@@ -19,7 +19,7 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 loop_time = 5;
 
 ground_truth_pos = [4*cos((t/loop_time)*2*pi);
-    1.5*sin((t/loop_time)*2*pi) + 2.5];
+    sin((t/loop_time)*2*pi) + 2];
 
 % the angle of this fake quad can be theoretically computed from the
 % direction of its acceleration
@@ -59,12 +59,21 @@ F_jaco = jacobian(f_func, mu);
 
 % ground truth range function
 lidar_dir_gt = ([cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)]*[0;1]);
-range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt)
+range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt);
 
+accelerometer_gt = [cos(-ground_truth_theta), -sin(-ground_truth_theta); sin(-ground_truth_theta), cos(-ground_truth_theta)] * ground_truth_accel + [gt_accel_bias_x; gt_accel_bias_z];
+
+odometer_gt = [cos(-ground_truth_theta), -sin(-ground_truth_theta); sin(-ground_truth_theta), cos(-ground_truth_theta)] * ground_truth_vel;
+odometer_gt(3, 1) = diff(ground_truth_theta, t)
+
+synthetic_z_func = [range_gt;
+                    accelerometer_gt(1);
+                    accelerometer_gt(2);
+                    odometer_gt];
 
 % RUN THE FILTER
 
 for time = (0:dt:20)
-    draw2dQuad(ground_truth_pos, ground_truth_theta, range_gt, time)
+    draw2dQuad(ground_truth_pos, ground_truth_theta, synthetic_z_func, time)
 end
 
