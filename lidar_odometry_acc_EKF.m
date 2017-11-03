@@ -7,7 +7,7 @@ syms x z theta b_dx b_dz b_dtheta b_ax b_az bias_ax bias_az t
 
 G = 9.8;
 
-dt = 0.1; % this is the time increments between measurements
+dt = 0.02; % this is the time increments between measurements
 
 gt_accel_bias_x = 0.1;
 gt_accel_bias_z = 0.3;
@@ -16,7 +16,7 @@ mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 
 % form a parametric equation of motion to compute the synthetic sensor
 % measurments from
-loop_time = 5;
+loop_time = 3;
 
 ground_truth_pos = [4*cos((t/loop_time)*2*pi);
     sin((t/loop_time)*2*pi) + 2];
@@ -61,9 +61,10 @@ F_jaco = jacobian(f_func, mu);
 lidar_dir_gt = ([cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)]*[0;1]);
 range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt);
 
-accelerometer_gt = [cos(-ground_truth_theta), -sin(-ground_truth_theta); sin(-ground_truth_theta), cos(-ground_truth_theta)] * ground_truth_accel + [gt_accel_bias_x; gt_accel_bias_z];
+accelerometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)] * ground_truth_accel + [gt_accel_bias_x;gt_accel_bias_z];
 
-odometer_gt = [cos(-ground_truth_theta), -sin(-ground_truth_theta); sin(-ground_truth_theta), cos(-ground_truth_theta)] * ground_truth_vel;
+odometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)] * ground_truth_vel;
+odometer_gt(2, 1) = odometer_gt(2, 1)
 odometer_gt(3, 1) = diff(ground_truth_theta, t)
 
 synthetic_z_func = [range_gt;
