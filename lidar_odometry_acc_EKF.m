@@ -52,8 +52,8 @@ f_func = [x + cos(theta)*(dt*b_dx + 0.5*dt^2*b_ax) + sin(theta)*(dt*b_dz + 0.5*d
 F_jaco = jacobian(f_func, symbolic_state) % describes how uncertainty propagates
 
 Q = eye(10); % prediction/innovation uncertainty
-Q(1, 1) = 2*dt;
-Q(2, 2) = 2*dt;
+Q(1, 1) = 0.003*dt;
+Q(2, 2) = 0.003*dt;
 Q(3, 3) = 0.003*dt;
 Q(4, 4) = 2*dt;
 Q(5, 5) = 2*dt;
@@ -111,25 +111,25 @@ R(6, 6) = 0.003;
 
 %initialize the state
 mu = [double(subs(ground_truth_pos(1), t, 0));
-    double(subs(ground_truth_pos(2), t, 0));
-    double(subs(ground_truth_theta, t, 0));
+    1.5;
     0;
-    0;
-    0;
-    0;
-    0;
+    5;
+    1;
+    1;
+    5;
+    10;
     gt_accel_bias_x;
     gt_accel_bias_z];
 
 Sigma = eye(10);
 Sigma(1, 1) = 0.25;
-Sigma(2, 2) = 0.25;
-Sigma(3, 3) = 0.25;
-Sigma(4, 4) = 100;
-Sigma(5, 5) = 100;
-Sigma(6, 6) = 100;
-Sigma(7, 7) = 100;
-Sigma(8, 8) = 100;
+Sigma(2, 2) = 10;
+Sigma(3, 3) = 1000;
+Sigma(4, 4) = 1000;
+Sigma(5, 5) = 1000;
+Sigma(6, 6) = 1000;
+Sigma(7, 7) = 1;
+Sigma(8, 8) = 1000;
 Sigma(9, 9) = 0.1;
 Sigma(10, 10) = 0.1;
 
@@ -149,6 +149,11 @@ for time = (0:dt:20)
     H = double(subs(H_jaco, symbolic_state, mu));
     
     measurement = double(subs(synthetic_z_func, t, time));
+    
+    % add noise to measurement
+    noise = diag(R) .* randn(size(measurement));
+    measurement = measurement + noise
+    
     expected_measurement = double(subs(h_func, symbolic_state, mu));
     y = measurement - expected_measurement;
     S = R + H*Sigma*H';
@@ -159,7 +164,11 @@ for time = (0:dt:20)
     
     %draw a gaussian of the prediction
     subplot(2, 4, [5, 6])
-    drawGaussian2D(Sigma(1:2, 1:2), mu(1:2))
+    hold on;
+    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 0.5)
+    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 1)
+    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 2)
+    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 10)
     
     %draw our sigma with an image
     subplot(2, 4, 3)
