@@ -12,11 +12,11 @@ dt = 0.02; % this is the time increments between measurements
 gt_accel_bias_x = 0.1;
 gt_accel_bias_z = 0.3;
 
-mu = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
+symbolic_state = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 
 % form a parametric equation of motion to compute the synthetic sensor
 % measurments from
-loop_time = 5;
+loop_time = 3;
 
 ground_truth_pos = [4*cos((t/loop_time)*2*pi);
     sin((t/loop_time)*2*pi) + 2];
@@ -47,9 +47,21 @@ f_func = [x + cos(theta)*(dt*b_dx + 0.5*dt^2*b_ax) - sin(theta)*(dt*b_dz + 0.5*d
         b_ax;
         b_az;
         bias_ax;
-        bias_az];
+        bias_az]; % predict the state forward in time
     
-F_jaco = jacobian(f_func, mu);
+F_jaco = jacobian(f_func, symbolic_state); % describes how uncertainty propagates
+
+Q = eye(10); % prediction/innovation uncertainty
+Q(1, 1) = 2*dt;
+Q(2, 2) = 2*dt;
+Q(3, 3) = 2*dt;
+Q(4, 4) = 2*dt;
+Q(5, 5) = 2*dt;
+Q(6, 6) = 2*dt;
+Q(7, 7) = 4*dt;
+Q(8, 8) = 4*dt;
+Q(9, 9) = 0.01*dt;
+Q(10, 10) = 0.01*dt;
 
 
 
@@ -61,7 +73,7 @@ F_jaco = jacobian(f_func, mu);
 lidar_dir_gt = ([cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)]*[0;1]);
 range_gt = norm((ground_truth_pos(2)/lidar_dir_gt(2)) * lidar_dir_gt);
 
-accelerometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)] * ground_truth_accel + [];
+accelerometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)] * ground_truth_accel + [gt_accel_bias_x;gt_accel_bias_z];
 
 odometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)] * ground_truth_vel;
 odometer_gt(2, 1) = odometer_gt(2, 1)
@@ -74,7 +86,45 @@ synthetic_z_func = [range_gt;
 
 % RUN THE FILTER
 
+%initialize the state
+mu = [double(subs(ground_truth_pos(1), t, 0));
+    double(subs(ground_truth_pos(2), t, 0));
+    double(subs(ground_truth_theta, t, 0));
+    0;
+    0;
+    0;
+    0;
+    0;
+    gt_accel_bias_x;
+    gt_accel_bias_z];
+
+Sigma = eye(10);
+Sigma(1, 1) = 0.25;
+Sigma(2, 2) = 0.25;
+Sigma(3, 3) = 0.25;
+Sigma(4, 4) = 100;
+Sigma(5, 5) = 100;
+Sigma(6, 6) = 100;
+Sigma(7, 7) = 100;
+Sigma(8, 8) = 100;
+Sigma(9, 9) = 1;
+Sigma(10, 10) = 1;
+
 for time = (0:dt:20)
+    %clear the figure
+    clf;
+    %draw ground truth of quad
+    subplot(2, 4, [1, 2])
     draw2dQuad(ground_truth_pos, ground_truth_theta, synthetic_z_func, time)
+    
+    %compute the F jacobian
+    F = double(subs(F_jaco, symbolic_state, mu));
+    
+    
+    %draw a gaussian of the prediction
+    subplot(2, 4, [5, 6])
+    drawGaussian2D(Sigma(1:2, 1:2), mu(1:2))
+    
+    drawnow;
 end
 

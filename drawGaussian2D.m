@@ -12,9 +12,11 @@ surf(x1,x2,F);
 caxis([min(F(:))-.5*range(F(:)),max(F(:))]);
 axis([-10 10 -10 10 0 1])
 xlabel('x1'); ylabel('x2'); zlabel('Probability Density');
-    
-axis([-10 10 -10 10 0 1])    
+
+axis([-8 8 0 8 0 1])
  view(0,90)
+  pbaspect([2 1 1])
+ 
 
 end
 

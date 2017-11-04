@@ -7,11 +7,11 @@ function draw2dQuad(pos_function, theta_function, synthetic_z_func, t_eval)
     
     R = [cos(theta), -sin(theta); sin(theta), cos(theta)];
     
-    z = double(subs(synthetic_z_func, t, t_eval))
+    z = double(subs(synthetic_z_func, t, t_eval));
     
-    clf;
+    
     hold on
-    
+
     axis([-8 8 0 8 0 1])    
     view(0,90)
     pbaspect([2 1 1])
@@ -28,6 +28,6 @@ function draw2dQuad(pos_function, theta_function, synthetic_z_func, t_eval)
     text(-7.5, 0.5, num2str(t_eval, 'Time: %.2f'))
     
     hold off
-    drawnow
+    
 end
 
