@@ -38,8 +38,8 @@ ground_truth_theta = sign(u(1)-v(1))*acos(dot(u, v));
 % PRECOMPUTE THE KALMAN FILTER FUNCTIONS/JACOBIANS
 
 % precompute the kalman filter update and process functions
-f_func = [x + cos(theta)*(dt*b_dx + 0.5*dt^2*b_ax) - sin(theta)*(dt*b_dz + 0.5*dt^2*b_az);
-        z + sin(theta)*(dt*b_dx + 0.5*dt^2*b_ax) + cos(theta)*(dt*b_dz + 0.5*dt^2*b_az);
+f_func = [x + cos(theta)*(dt*b_dx + 0.5*dt^2*b_ax) + sin(theta)*(dt*b_dz + 0.5*dt^2*b_az);
+        z - sin(theta)*(dt*b_dx + 0.5*dt^2*b_ax) + cos(theta)*(dt*b_dz + 0.5*dt^2*b_az);
         theta + dt*b_dtheta;
         b_dx + dt*b_ax;
         b_dz + dt*b_az;
@@ -60,10 +60,8 @@ Q(5, 5) = 2*dt;
 Q(6, 6) = 2*dt;
 Q(7, 7) = 4*dt;
 Q(8, 8) = 4*dt;
-Q(9, 9) = 0.01*dt;
-Q(10, 10) = 0.01*dt;
-
-
+Q(9, 9) = 0.001*dt;
+Q(10, 10) = 0.001*dt;
 
 % synthetic measurement functions
 %[range, b_dx, b_dz, b_ax, b_az]
@@ -83,6 +81,15 @@ synthetic_z_func = [range_gt;
                     accelerometer_gt(1);
                     accelerometer_gt(2);
                     odometer_gt];
+                
+% observation function - this can be played with
+% given your predicted state what measurement would you expect from your
+% sensors
+lidar_dir = ([cos(theta), -sin(theta); sin(theta), cos(theta)]*[0;1]);
+range_obs_function = norm((z/lidar_dir(2)) * lidar_dir);
+
+h_func = [range_obs_function;
+         [b_ax + bias_ax]
 
 % RUN THE FILTER
 
@@ -91,7 +98,7 @@ mu = [double(subs(ground_truth_pos(1), t, 0));
     double(subs(ground_truth_pos(2), t, 0));
     double(subs(ground_truth_theta, t, 0));
     0;
-    0;
+    10;
     0;
     0;
     0;
@@ -107,8 +114,8 @@ Sigma(5, 5) = 100;
 Sigma(6, 6) = 100;
 Sigma(7, 7) = 100;
 Sigma(8, 8) = 100;
-Sigma(9, 9) = 1;
-Sigma(10, 10) = 1;
+Sigma(9, 9) = 0.1;
+Sigma(10, 10) = 0.1;
 
 for time = (0:dt:20)
     %clear the figure
@@ -119,11 +126,17 @@ for time = (0:dt:20)
     
     %compute the F jacobian
     F = double(subs(F_jaco, symbolic_state, mu));
+    Sigma = F*Sigma*F' + Q; % propagate the uncertainty
     
+    mu = double(subs(f_func, symbolic_state, mu)) % predict forward
     
     %draw a gaussian of the prediction
     subplot(2, 4, [5, 6])
     drawGaussian2D(Sigma(1:2, 1:2), mu(1:2))
+    
+    %draw our sigma with an image
+    subplot(2, 4, 3)
+    image(Sigma)
     
     drawnow;
 end
