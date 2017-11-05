@@ -100,7 +100,7 @@ H_jaco = jacobian(h_func, symbolic_state) % describes how a measurement can upda
 
 % this matrix describes the uncertainties in each measurement
 R = eye(6);
-R(1, 1) = 0.03;
+R(1, 1) = 0.05;
 R(2, 2) = 0.02;
 R(3, 3) = 0.02;
 R(4, 4) = 0.003;
@@ -111,7 +111,7 @@ R(6, 6) = 0.003;
 
 %initialize the state
 mu = [double(subs(ground_truth_pos(1), t, 0));
-    1.5;
+    5;
     0;
     5;
     1;
@@ -123,7 +123,7 @@ mu = [double(subs(ground_truth_pos(1), t, 0));
 
 Sigma = eye(10);
 Sigma(1, 1) = 0.25;
-Sigma(2, 2) = 10;
+Sigma(2, 2) = 1000;
 Sigma(3, 3) = 1000;
 Sigma(4, 4) = 1000;
 Sigma(5, 5) = 1000;
@@ -164,6 +164,7 @@ for time = (0:dt:20)
     
     %draw a gaussian of the position
     subplot(2, 4, [5, 6])
+    title('Posi Estimate')
     hold on;
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 0.5)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 1)
@@ -171,20 +172,29 @@ for time = (0:dt:20)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 10)
     
     %draw a gaussian of the body frame acceleration
-    subplot(2, 4, [7, 8])
+    subplot(2, 4, 7)
+    title('Body Frame Acceleration Estimate')
     hold on;
-    plot_gaussian_ellipsoid(Sigma(7:8, 1:2), mu(1:2), 0.5)
-    plot_gaussian_ellipsoid(Sigma(1:8, 1:2), mu(1:2), 1)
-    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 2)
-    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 10)
+    plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 0.5)
+    plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 1)
+    plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 2)
+    plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 10)
+    
+    axis([-10 10 -10 10 0 1])
+    view(0,90)
+    pbaspect([1 1 1])
     
     %draw our sigma with an image
+    title('Full Covariance Matrix')
     subplot(2, 4, 3)
     imagesc(Sigma)
+    colorbar;
     
     %draw the Kalman gain
+    title('Kalman Gain')
     subplot(2, 4, 4)
     imagesc(K)
+    colorbar;
     
      %draw ground truth of quad
     subplot(2, 4, [1, 2])

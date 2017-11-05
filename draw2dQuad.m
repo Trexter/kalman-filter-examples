@@ -27,6 +27,11 @@ function draw2dQuad(pos_function, theta_function, synthetic_z_func, mu, t_eval)
     
     text(-7.5, 0.5, num2str(t_eval, 'Time: %.2f'))
     
+    line([-7.5; pos(1)], [7.5; pos(2)])
+    text(-7.5, 7.5, 'Ground Truth')
+    
+    line([-5; mu(1)], [7.5; mu(2)])
+    text(-5, 7.5, 'EKF Estimate')
     
     quiver(mu(1), mu(2), 0.5*cos(mu(3)), -0.5*sin(mu(3)));
     quiver(mu(1), mu(2), 0.5*sin(mu(3)), 0.5*cos(mu(3)));

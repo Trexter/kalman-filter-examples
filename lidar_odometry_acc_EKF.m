@@ -16,7 +16,7 @@ symbolic_state = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_a
 
 % form a parametric equation of motion to compute the synthetic sensor
 % measurments from
-loop_time = 5;
+loop_time = 7;
 
 ground_truth_pos = [4*cos((t/loop_time)*2*pi);
     sin((t/loop_time)*2*pi) + 2];
@@ -100,7 +100,7 @@ H_jaco = jacobian(h_func, symbolic_state) % describes how a measurement can upda
 
 % this matrix describes the uncertainties in each measurement
 R = eye(6);
-R(1, 1) = 0.03;
+R(1, 1) = 0.05;
 R(2, 2) = 0.02;
 R(3, 3) = 0.02;
 R(4, 4) = 0.003;
@@ -111,7 +111,7 @@ R(6, 6) = 0.003;
 
 %initialize the state
 mu = [double(subs(ground_truth_pos(1), t, 0));
-    1.5;
+    5;
     0;
     5;
     1;
@@ -123,7 +123,7 @@ mu = [double(subs(ground_truth_pos(1), t, 0));
 
 Sigma = eye(10);
 Sigma(1, 1) = 0.25;
-Sigma(2, 2) = 10;
+Sigma(2, 2) = 1000;
 Sigma(3, 3) = 1000;
 Sigma(4, 4) = 1000;
 Sigma(5, 5) = 1000;
@@ -164,36 +164,48 @@ for time = (0:dt:20)
     
     %draw a gaussian of the position
     subplot(2, 4, [5, 6])
+    title('Position Estimate')
     hold on;
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 0.5)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 1)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 2)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 10)
+    xlabel('X')
+    ylabel('Z')
     
     %draw a gaussian of the body frame acceleration
     subplot(2, 4, 7)
+    title('Body Frame Acceleration Estimate')
     hold on;
     plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 0.5)
     plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 1)
     plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 2)
     plot_gaussian_ellipsoid(Sigma(7:8, 7:8), mu(7:8), 10)
+    xlabel('ax_b_o_d_y (m/s^2)')
+    ylabel('az_b_o_d_y (m/s^2)')
     
-    axis([-5 5 -5 5 0 1])
+    axis([-10 10 -10 10 0 1])
     view(0,90)
     pbaspect([1 1 1])
     
     %draw our sigma with an image
     subplot(2, 4, 3)
     imagesc(Sigma)
+    title('Full Covariance Matrix')
+    colorbar;
     
     %draw the Kalman gain
     subplot(2, 4, 4)
     imagesc(K)
+    title('Kalman Gain')
+    colorbar;
     
      %draw ground truth of quad
     subplot(2, 4, [1, 2])
+    title('Ground Truth vs EKF Estimate')
     draw2dQuad(ground_truth_pos, ground_truth_theta, synthetic_z_func, mu, time)
-    
+    xlabel('X')
+    ylabel('Z')
     
     drawnow;
 end
