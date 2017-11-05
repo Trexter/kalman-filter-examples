@@ -160,7 +160,10 @@ for time = (0:dt:200)
     K = Sigma*H'*inv(S);
     
     mu = mu + K*y;
-    Sigma = Sigma - K*S*K';
+    
+    % use Josephs form: P = ( I ? KH) P (I ? KH)' + KRK'
+    I_KH = (eye(size(Sigma)) - K*H);
+    Sigma = I_KH*Sigma*I_KH' + K*R*K'
     
     %draw a gaussian of the position
     subplot(2, 4, [5, 6])
@@ -221,8 +224,6 @@ for time = (0:dt:200)
     draw2dQuad(ground_truth_pos, ground_truth_theta, synthetic_z_func, mu, time)
     xlabel('X')
     ylabel('Z')
-    
-    Sigma
     
     drawnow;
 end
