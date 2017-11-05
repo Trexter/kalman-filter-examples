@@ -60,8 +60,8 @@ Q(5, 5) = 2*dt;
 Q(6, 6) = 2*dt;
 Q(7, 7) = 2*dt;
 Q(8, 8) = 2*dt;
-Q(9, 9) = 0.001*dt;
-Q(10, 10) = 0.001*dt;
+Q(9, 9) = 0.005*dt;
+Q(10, 10) = 0.005*dt;
 
 % synthetic measurement functions
 %[range, b_dx, b_dz, b_ax, b_az]
@@ -111,29 +111,29 @@ R(6, 6) = 0.003;
 
 %initialize the state
 mu = [double(subs(ground_truth_pos(1), t, 0));
-    5;
+    1;
     0;
-    5;
-    1;
-    1;
-    5;
-    10;
-    gt_accel_bias_x;
-    gt_accel_bias_z];
+    0;
+    0;
+    0;
+    0;
+    0;
+    0;
+    0];
 
 Sigma = eye(10);
 Sigma(1, 1) = 0.25;
-Sigma(2, 2) = 1000;
-Sigma(3, 3) = 1000;
-Sigma(4, 4) = 1000;
-Sigma(5, 5) = 1000;
-Sigma(6, 6) = 1000;
-Sigma(7, 7) = 1000;
-Sigma(8, 8) = 1000;
-Sigma(9, 9) = 0.1;
-Sigma(10, 10) = 0.1;
+Sigma(2, 2) = 10000;
+Sigma(3, 3) = 10000;
+Sigma(4, 4) = 10000;
+Sigma(5, 5) = 10000;
+Sigma(6, 6) = 10000;
+Sigma(7, 7) = 10000;
+Sigma(8, 8) = 10000;
+Sigma(9, 9) = 100000;
+Sigma(10, 10) = 100000;
 
-for time = (0:dt:20)
+for time = (0:dt:200)
     %clear the figure
     clf;
     
@@ -152,7 +152,7 @@ for time = (0:dt:20)
     
     % add noise to measurement
     noise = diag(R) .* randn(size(measurement));
-    measurement = measurement + noise
+    measurement = measurement + noise;
     
     expected_measurement = double(subs(h_func, symbolic_state, mu));
     y = measurement - expected_measurement;
@@ -188,6 +188,21 @@ for time = (0:dt:20)
     view(0,90)
     pbaspect([1 1 1])
     
+    %draw a gaussian of the bias estimate
+    subplot(2, 4, 8)
+    title('Accelerometer Bias Estimate')
+    hold on;
+    plot_gaussian_ellipsoid(Sigma(9:10, 9:10), mu(9:10), 0.5)
+    plot_gaussian_ellipsoid(Sigma(9:10, 9:10), mu(9:10), 1)
+    plot_gaussian_ellipsoid(Sigma(9:10, 9:10), mu(9:10), 2)
+    plot_gaussian_ellipsoid(Sigma(9:10, 9:10), mu(9:10), 10)
+    xlabel('Bias_x (m/s^2)')
+    ylabel('Bias_z (m/s^2)')
+    
+    axis([-3 3 -3 3 0 1])
+    view(0,90)
+    pbaspect([1 1 1])
+    
     %draw our sigma with an image
     subplot(2, 4, 3)
     imagesc(Sigma)
@@ -206,6 +221,8 @@ for time = (0:dt:20)
     draw2dQuad(ground_truth_pos, ground_truth_theta, synthetic_z_func, mu, time)
     xlabel('X')
     ylabel('Z')
+    
+    Sigma
     
     drawnow;
 end
