@@ -7,7 +7,7 @@ syms x z theta b_dx b_dz b_dtheta b_ax b_az bias_ax bias_az t
 
 G = 9.8;
 
-dt = 0.02; % this is the time increments between measurements
+dt = 0.1; % this is the time increments between measurements
 
 gt_accel_bias_x = 0.1;
 gt_accel_bias_z = 0.3;
@@ -128,7 +128,7 @@ Sigma(3, 3) = 1000;
 Sigma(4, 4) = 1000;
 Sigma(5, 5) = 1000;
 Sigma(6, 6) = 1000;
-Sigma(7, 7) = 1;
+Sigma(7, 7) = 1000;
 Sigma(8, 8) = 1000;
 Sigma(9, 9) = 0.1;
 Sigma(10, 10) = 0.1;
@@ -151,7 +151,8 @@ for time = (0:dt:20)
     measurement = double(subs(synthetic_z_func, t, time));
     
     % add noise to measurement
-    noise = (diag(R)*randn(size(measurement))')
+    noise = diag(R) .* randn(size(measurement));
+    measurement = measurement + noise
     
     expected_measurement = double(subs(h_func, symbolic_state, mu));
     y = measurement - expected_measurement;
@@ -161,11 +162,19 @@ for time = (0:dt:20)
     mu = mu + K*y;
     Sigma = Sigma - K*S*K';
     
-    %draw a gaussian of the prediction
+    %draw a gaussian of the position
     subplot(2, 4, [5, 6])
     hold on;
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 0.5)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 1)
+    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 2)
+    plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 10)
+    
+    %draw a gaussian of the body frame acceleration
+    subplot(2, 4, [7, 8])
+    hold on;
+    plot_gaussian_ellipsoid(Sigma(7:8, 1:2), mu(1:2), 0.5)
+    plot_gaussian_ellipsoid(Sigma(1:8, 1:2), mu(1:2), 1)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 2)
     plot_gaussian_ellipsoid(Sigma(1:2, 1:2), mu(1:2), 10)
     
