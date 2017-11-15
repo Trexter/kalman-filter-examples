@@ -12,6 +12,8 @@ dt = 0.1; % this is the time increments between measurements
 gt_accel_bias_x = 0.1;
 gt_accel_bias_z = 0.3;
 
+%landmark pos at orgin
+
 symbolic_state = [x; z; theta; b_dx; b_dz; b_dtheta; b_ax; b_az; bias_ax; bias_az];
 
 % form a parametric equation of motion to compute the synthetic sensor
@@ -76,6 +78,9 @@ accelerometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(groun
 odometer_gt = [cos(ground_truth_theta), -sin(ground_truth_theta); sin(ground_truth_theta), cos(ground_truth_theta)] * ground_truth_vel;
 odometer_gt(2, 1) = odometer_gt(2, 1)
 odometer_gt(3, 1) = diff(ground_truth_theta, t)
+
+% create the gt of the image sensor detecting the landmark
+%TODO
 
 synthetic_z_func = [range_gt;
                     accelerometer_gt(1);
@@ -222,6 +227,13 @@ for time = (0:dt:200)
     subplot(2, 4, [1, 2])
     title('Ground Truth vs EKF Estimate')
     draw2dQuad(ground_truth_pos, ground_truth_theta, synthetic_z_func, mu, time)
+    
+    % plot the landmark
+    plot(0,0,'r*')
+    
+    %plot the image plane with detection
+    %TODO
+    
     xlabel('X')
     ylabel('Z')
     
