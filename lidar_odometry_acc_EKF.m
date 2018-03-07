@@ -110,9 +110,9 @@ R(6, 6) = 0.003;
 % RUN THE FILTER
 
 %initialize the state
-mu = [double(subs(ground_truth_pos(1), t, 0));
-    1;
-    0;
+mu = [0;
+    0.1;
+    0.1;
     0;
     0;
     0;

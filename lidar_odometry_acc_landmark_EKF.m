@@ -166,7 +166,7 @@ for time = (0:dt:200)
     
     mu = mu + K*y;
     
-    % use Josephs form: P = ( I ? KH) P (I ? KH)' + KRK'
+    % use Josephs form: P = ( I - KH) P (I - KH)' + KRK'
     I_KH = (eye(size(Sigma)) - K*H);
     Sigma = I_KH*Sigma*I_KH' + K*R*K'
     
